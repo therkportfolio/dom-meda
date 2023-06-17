@@ -1,0 +1,57 @@
+Sub MissingNameOTSheet()
+    Dim folderPath As String
+    Dim selectedFile As Variant
+    Dim excelApp As Object
+    Dim wb As Object
+    Dim ws As Object
+    Dim newWB As Object
+    Dim newWS As Object
+    Dim rowCounter As Long
+    
+    ' Prompt the user to select a folder
+    With Application.FileDialog(msoFileDialogFolderPicker)
+        .Title = "Select Folder"
+        .Show
+        If .SelectedItems.Count = 0 Then Exit Sub
+        folderPath = .SelectedItems(1) & Application.PathSeparator
+    End With
+    
+    ' Create a new workbook to record the file names
+    Set newWB = Workbooks.Add
+    Set newWS = newWB.Sheets(1)
+    newWS.Cells(1, 1).Value = "File Name of Missing Payroll Numbers"
+    rowCounter = 2
+    
+    ' Get all Excel files in the selected folder
+    selectedFile = Dir(folderPath & "*.xlsx")
+    
+    ' Open each file and check if A4 is empty
+    Do While selectedFile <> ""
+        Set excelApp = CreateObject("Excel.Application")
+        Set wb = excelApp.Workbooks.Open(folderPath & selectedFile)
+        Set ws = wb.Sheets(1)
+        
+        ' Check if A4 is empty
+        If ws.Range("A4").Value = "" Then
+            newWS.Cells(rowCounter, 1).Value = selectedFile
+            rowCounter = rowCounter + 1
+        End If
+        
+        wb.Close SaveChanges:=False
+        excelApp.Quit
+        selectedFile = Dir
+    Loop
+    
+    ' Save and close the new workbook
+    newWB.SaveAs folderPath & "Missing_Names_OTSheets.xlsx"
+    newWB.Close SaveChanges:=False
+    
+    ' Cleanup
+    Set ws = Nothing
+    Set wb = Nothing
+    Set excelApp = Nothing
+    Set newWS = Nothing
+    Set newWB = Nothing
+    
+    MsgBox "Operation complete. Check the folder for 'Missing_A4_Files.xlsx'."
+End Sub
