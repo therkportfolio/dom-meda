@@ -1,0 +1,29 @@
+Sub ExportAsPDF()
+
+Dim FldrPicker As FileDialog
+Dim myFolder As String
+
+'Have User Select Folder to Save to with Dialog Box
+  Set FldrPicker = Application.FileDialog(msoFileDialogFolderPicker)
+
+  With FldrPicker
+    .Title = "Select A Target Folder"
+    .AllowMultiSelect = False
+    If .Show <> -1 Then Exit Sub 'Check if user clicked cancel button
+    NewPath = .SelectedItems(1) & "\"
+  End With
+
+
+Dim currentSheet As Worksheet
+    Dim i As Long
+    
+    With ActiveWorkbook
+        Set currentSheet = .ActiveSheet
+        For i = 5 To 17
+            .Worksheets(i).Select
+            .ActiveSheet.ExportAsFixedFormat Type:=x1TypePDF, Filename:=NewPath & .Worksheets(i).Name & ".pdf", _
+                Quality:=x1QualityStandard, IncludeDocProperties:=True, IgnorePrintAreas:=False, OpenAfterPublish:=False
+        Next
+        currentSheet.Select
+    End With
+End Sub
