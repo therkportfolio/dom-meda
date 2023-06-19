@@ -44,6 +44,7 @@ Sub CollateOTFiles()
     newWS.Cells(1, 13).Value = "End of Unrostered Overtime"
     newWS.Cells(1, 14).Value = "Total time"
     
+    ' Copy over the pay period data so that the lookup formulas can work properly
     ThisWorkbook.Sheets("PayPeriods").Copy After:=newWB.Sheets(1)
     
     rowCounter = 2
@@ -61,14 +62,16 @@ Sub CollateOTFiles()
         For Each sourceRow In ws.Range("A11:A25").Rows
             isEmpty = True ' Assume the row is empty initially
             
-            ' If the row is not empty, copy the first 4 cells to the target sheet
+            ' Looping code to copy the relevant data to the new workbook
             If sourceRow.Cells(1).Value <> "" Then
+                ' The formulas that will help with calcuating the pay periods
                 cellvar = "I" & rowCounter
                 cellvardate = "A" & rowCounter
                 formula = "=LOOKUP(2,1/(PayPeriods!B:B<=" & cellvar & ")/(PayPeriods!C:C>=" & cellvar & "),PayPeriods!A:A)"
                 formuladate1 = "=VLOOKUP(" & cellvardate & ",PayPeriods!A:C,2,0)"
                 formuladate2 = "=VLOOKUP(" & cellvardate & ",PayPeriods!A:C,3,0)"
                 
+                ' Copy individual cells in a systematic fashion
                 newWS.Cells(rowCounter, 1).formula = formula
                 newWS.Cells(rowCounter, 2).formula = formuladate1
                 newWS.Cells(rowCounter, 3).formula = formuladate2
@@ -84,6 +87,7 @@ Sub CollateOTFiles()
                 newWS.Cells(rowCounter, 13).Value = sourceRow.Columns("L").Value
                 newWS.Cells(rowCounter, 14).Value = sourceRow.Columns("M").Value
                 
+                ' Formatting of certain columns in the new workbook
                 newWS.Columns("L").NumberFormat = "hh:mm"
                 newWS.Columns("M").NumberFormat = "hh:mm"
                 newWS.Columns("N").NumberFormat = "0.00"
