@@ -1,0 +1,205 @@
+Sub CreateGraph()
+    Dim ws As Worksheet
+    Dim rngData As Range
+    Dim rngLabels As Range
+    Dim rngValues As Range
+    Dim chartObj As ChartObject
+    Dim chartData As Chart
+    Dim destRange As Range
+    Dim srcRange As Range
+    
+    Set ws = ThisWorkbook.Worksheets("Modifying Data")
+    
+    ' Data Consolidation
+    
+    ws.Range("K1").Consolidate Sources:=Array("Modifying Data!R1C1:R60C2"), _
+    Function:=xlSum, TopRow:=False, LeftColumn:=True, CreateLinks:=False
+   
+    ws.Range("N1").Consolidate Sources:=Array("Modifying Data!R1C4:R60C5"), _
+    Function:=xlSum, TopRow:=False, LeftColumn:=True, CreateLinks:=False
+
+    ws.Range("Q1").Consolidate Sources:=Array("Modifying Data!R1C7:R60C8"), _
+    Function:=xlSum, TopRow:=False, LeftColumn:=True, CreateLinks:=False
+    
+    
+    ' Run 1 - Chart
+    
+    Set rngData = ws.Range("A1").CurrentRegion
+    Set rngLabels = rngData.Range("K2:K60")
+    Set rngValues = rngData.Range("L2:L60")
+    
+    Set chartObj = ws.ChartObjects.Add(Left:=100, Width:=400, Top:=100, Height:=300)
+    Set chartData = chartObj.Chart
+    chartData.SetSourceData Source:=rngValues
+    
+    chartData.SeriesCollection(1).XValues = rngLabels
+    chartObj.Chart.ChartType = xlPie
+    chartObj.Chart.ChartStyle = 251
+    chartObj.Chart.HasTitle = True
+    chartObj.Chart.ChartTitle.Text = "Unit"
+    chartObj.Chart.HasLegend = False
+    chartObj.Chart.ApplyDataLabels
+    chartObj.Chart.SeriesCollection(1).DataLabels.ShowCategoryName = True
+    chartObj.Chart.SeriesCollection(1).DataLabels.Position = xlLabelPositionOutsideEnd
+    chartObj.Chart.ChartArea.Border.LineStyle = xlNone
+    
+    
+    ' Run 2 - Chart
+    
+    Set rngLabels = rngData.Range("N2:N60")
+    Set rngValues = rngData.Range("O2:O60")
+    
+    Set chartObj = ws.ChartObjects.Add(Left:=100, Width:=400, Top:=100, Height:=300)
+    Set chartData = chartObj.Chart
+    chartData.SetSourceData Source:=rngValues
+    
+    chartData.SeriesCollection(1).XValues = rngLabels
+    chartObj.Chart.ChartType = xlPie
+    chartObj.Chart.ChartStyle = 251
+    chartObj.Chart.HasTitle = True
+    chartObj.Chart.ChartTitle.Text = "Gender"
+    chartObj.Chart.HasLegend = False
+    chartObj.Chart.ApplyDataLabels
+    chartObj.Chart.SeriesCollection(1).DataLabels.ShowCategoryName = True
+    chartObj.Chart.SeriesCollection(1).DataLabels.Position = xlLabelPositionOutsideEnd
+    chartObj.Left = chartObj.Left + 500
+    chartObj.Chart.ChartArea.Border.LineStyle = xlNone
+    
+    
+    ' Run 3 - Chart
+    
+    Set rngLabels = rngData.Range("Q2:Q60")
+    Set rngValues = rngData.Range("R2:R60")
+    
+    Set chartObj = ws.ChartObjects.Add(Left:=100, Width:=400, Top:=100, Height:=300)
+    Set chartData = chartObj.Chart
+    chartData.SetSourceData Source:=rngValues
+    
+    chartData.SeriesCollection(1).XValues = rngLabels
+    chartObj.Chart.ChartType = xlPie
+    chartObj.Chart.ChartStyle = 251
+    chartObj.Chart.HasTitle = True
+    chartObj.Chart.ChartTitle.Text = "Dwelling"
+    chartObj.Chart.HasLegend = False
+    chartObj.Chart.ApplyDataLabels
+    chartObj.Chart.SeriesCollection(1).DataLabels.ShowCategoryName = True
+    chartObj.Chart.SeriesCollection(1).DataLabels.Position = xlLabelPositionOutsideEnd
+    chartObj.Left = chartObj.Left + 1000
+    chartObj.Chart.ChartArea.Border.LineStyle = xlNone
+    
+    
+    
+    ' Export to PowerPoint
+    
+    Dim ws2 As Worksheet
+    Dim pptApp As Object
+    Dim pptPres As Object
+    Dim pptSlide As Object
+    Dim shape As Object
+    Dim rng As Range
+    Dim slideIndex As Integer
+    
+    Set ws2 = ThisWorkbook.Worksheets("Output Data")
+    Set rng = ws.Range("K2:R60")
+    Set pptApp = CreateObject("PowerPoint.Application")
+    Set pptPres = pptApp.Presentations.Add
+    
+    Dim titleSlide As Object
+    Set titleSlide = pptPres.Slides.Add(pptPres.Slides.Count + 1, 1) ' 1 represents the slide layout (Title Slide)
+    Dim titleCell As Range
+    Set titleCell = ws2.Range("B13") ' Update with the cell containing the title
+    titleSlide.Shapes.Title.TextFrame.TextRange.Text = titleCell.Value
+    
+    Dim rngX As Range
+    Dim rngTable As Object
+    Dim tableSlide As Object
+    Set rngX = ws2.Range("B2:E10")
+    
+    Set tableSlide = pptPres.Slides.Add(pptPres.Slides.Count + 1, 11) ' 11 represents the slide layout (Blank Slide)
+    rngX.Copy
+        
+    tableSlide.Select 'needed to add this line
+    Set rngTable = tableSlide.Shapes.Paste
+    
+    With rngTable
+        .Left = 70.99961
+        .Top = 150.61086
+        .Width = 760.2827
+        .Height = 300.2163
+    End With
+    
+    With tableSlide.Shapes(tableSlide.Shapes.Count).Table
+        Dim row As Integer
+        Dim col As Integer
+        
+        ' Loop through each cell in the table
+        For row = 1 To .Rows.Count
+            ' Set the height of the row
+            .Cell(row, 1).shape.TextFrame2.TextRange.ParagraphFormat.SpaceBefore = 0
+            .Cell(row, 1).shape.TextFrame2.TextRange.ParagraphFormat.SpaceAfter = 0
+            .Cell(row, 1).shape.TextFrame2.MarginTop = 0
+            .Cell(row, 1).shape.TextFrame2.MarginBottom = 0
+            .Cell(row, 1).shape.TextFrame2.MarginTop = 0 ' Update with the desired row height in points
+        
+            For col = 1 To .Columns.Count
+                ' Set the width of the column
+                ' .Columns(col).Width = 200 ' Update with the desired column width in points
+                
+                ' Align cells to the left
+                .Cell(row, col).shape.TextFrame2.TextRange.ParagraphFormat.Alignment = 1 ' 1 represents left alignment
+                .Cell(row, col).shape.TextFrame2.TextRange.Font.Size = 18 ' Update with the desired font size in points
+            Next col
+        Next row
+    End With
+
+    ' Add a title to the slide (optional)
+    tableSlide.Shapes.Title.TextFrame.TextRange.Text = "Mortality Data"
+    
+    
+    
+    For Each shape In ws.Shapes
+        If shape.Type = msoChart Then ' Check if the shape is a chart
+            ' Add a new slide to the presentation
+            Set pptSlide = pptPres.Slides.Add(pptPres.Slides.Count + 1, 12) ' 11 represents the slide layout (Blank Slide)
+            
+            ' Copy the chart as an image
+            shape.CopyPicture Appearance:=xlScreen, Format:=xlPicture
+            
+            ' Paste the image onto the slide
+            pptSlide.Shapes.PasteSpecial DataType:=2 ' 2 represents the PasteDataType for a picture
+            
+            ' Set the slide index for future reference
+            slideIndex = pptSlide.slideIndex
+            
+            ' Resize the image to fit the slide
+            Dim desiredWidth As Single
+            Dim desiredHeight As Single
+            desiredWidth = 640 ' Set the desired width in points
+            desiredHeight = 427 ' Set the desired height in points
+            
+            With pptSlide.Shapes(1)
+                .LockAspectRatio = msoTrue
+                .Width = desiredWidth
+                .Height = desiredHeight
+                .Top = (pptPres.PageSetup.SlideHeight - desiredHeight) / 2 ' Center vertically
+                .Left = (pptPres.PageSetup.SlideWidth - desiredWidth) / 2 ' Center horizontally
+            End With
+            
+            ' Add a title to the slide (optional)
+            ' pptSlide.Shapes.Title.TextFrame.TextRange.Text = "Graph Title"
+            
+            ' Move to the next slide
+            Set pptSlide = Nothing
+        End If
+    Next shape
+    
+    ' Show the PowerPoint application
+    pptApp.Visible = True
+    
+    ' Clean up
+    Set pptSlide = Nothing
+    Set pptPres = Nothing
+    Set pptApp = Nothing
+    Set ws = Nothing
+    Set wb = Nothing
+End Sub
