@@ -1,7 +1,7 @@
 Sub MissingNameOTSheet()
-    Dim folderPath As String
+    Dim FolderPath As String
     Dim selectedFile As Variant
-    Dim excelApp As Object
+    Dim excelApp As Excel.Application
     Dim wb As Object
     Dim ws As Object
     Dim newWB As Object
@@ -13,7 +13,7 @@ Sub MissingNameOTSheet()
         .Title = "Select Folder"
         .Show
         If .SelectedItems.Count = 0 Then Exit Sub
-        folderPath = .SelectedItems(1) & Application.PathSeparator
+        FolderPath = .SelectedItems(1) & Application.PathSeparator
     End With
     
     ' Create a new workbook to record the file names
@@ -23,12 +23,12 @@ Sub MissingNameOTSheet()
     rowCounter = 2
     
     ' Get all Excel files in the selected folder
-    selectedFile = Dir(folderPath & "*.xlsx")
+    selectedFile = Dir(FolderPath & "*.xlsx")
     
     ' Open each file and check if A4 is empty
     Do While selectedFile <> ""
-        Set excelApp = CreateObject("Excel.Application")
-        Set wb = excelApp.Workbooks.Open(folderPath & selectedFile)
+        Set excelApp = New Excel.Application
+        Set wb = excelApp.Workbooks.Open(FolderPath & selectedFile)
         Set ws = wb.Sheets(1)
         
         ' Check if A4 is empty
@@ -43,7 +43,7 @@ Sub MissingNameOTSheet()
     Loop
     
     ' Save and close the new workbook
-    newWB.SaveAs folderPath & "Missing_Names_OTSheets.xlsx"
+    newWB.SaveAs FolderPath & "Missing_Names_OTSheets.xlsx"
     newWB.Close SaveChanges:=False
     
     ' Cleanup
