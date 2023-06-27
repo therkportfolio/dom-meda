@@ -1,0 +1,60 @@
+Sub RenameOTTimesheets()
+    Dim FolderPath As String
+    Dim selectedFile As Variant
+    Dim Filename As String
+    Dim NewName As String
+    Dim FileExtension As String
+    Dim OldPath As String
+    Dim NewPath As String
+    
+    ' Prompt the user to select a folder
+    With Application.FileDialog(msoFileDialogFolderPicker)
+        .Title = "Select Folder"
+        .Show
+        If .SelectedItems.Count = 0 Then Exit Sub
+        FolderPath = .SelectedItems(1) & Application.PathSeparator
+    End With
+    
+    Dim userInput As String
+    
+    ' Prompt the user to input timesheet code
+    userInput = InputBox("Please enter the timesheet code:")
+    
+    ' Check if the user provided any input
+    While userInput = ""
+        ' Display an error message if no input was provided
+        MsgBox "No input provided."
+        
+        ' Prompt the user to input a string again
+        userInput = InputBox("Please enter the timesheet code:")
+    Wend
+    
+    
+    ' Loop through each file in the folder
+    Filename = Dir(FolderPath & "*.*")
+    Do While Filename <> ""
+        ' Check if the file is an Excel file
+        If Right(Filename, 4) = ".xls" Or Right(Filename, 5) = ".xlsx" Then
+            ' Open the workbook
+            Workbooks.Open Filename:=FolderPath & Filename
+            ' Get the value from cell A1
+            NewName = UCase(Range("C4").Value) & ", " & UCase(Range("D4").Value) & " " & userInput & " " & "OT"
+            ' Close the workbook without saving changes
+            ActiveWorkbook.Close SaveChanges:=False
+            
+            ' Get the file extension
+            FileExtension = Right(Filename, Len(Filename) - InStrRev(Filename, "."))
+            
+            ' Rename the file
+            OldPath = FolderPath & Filename
+            NewPath = FolderPath & NewName & "." & FileExtension
+            Name OldPath As NewPath
+        End If
+        
+        ' Move to the next file
+        Filename = Dir
+    Loop
+    
+    ' Show a message when the renaming process is complete
+    MsgBox "File renaming completed!"
+End Sub
