@@ -43,6 +43,10 @@ Sub MissingNameOTSheet()
     Loop
     
     ' Save and close the new workbook
+    FolderPath = FolderPath & "Results\"
+    If Dir(FolderPath, vbDirectory) = "" Then
+        MkDir FolderPath
+    End If
     newWB.SaveAs FolderPath & "Missing_Names_OTSheets.xlsx"
     newWB.Close SaveChanges:=False
     
