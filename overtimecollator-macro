@@ -17,6 +17,8 @@ Sub CollateOTFiles()
     Dim formuladate2 As String
     Dim cellvar As String
     Dim cellvardate As String
+    Dim unitvar As String
+    Dim costvar As String
 
     ' Prompt the user to select a folder
     With Application.FileDialog(msoFileDialogFolderPicker)
@@ -65,9 +67,9 @@ Sub CollateOTFiles()
             If sourceRow.Cells(1).Value <> "" Then
                 cellvar = "I" & rowCounter
                 cellvardate = "A" & rowCounter
-                formula = "=LOOKUP(2,1/(PayPeriods!B:B<=" & cellvar & ")/(PayPeriods!C:C>=" & cellvar & "),PayPeriods!A:A)"
-                formuladate1 = "=VLOOKUP(" & cellvardate & ",PayPeriods!A:C,2,0)"
-                formuladate2 = "=VLOOKUP(" & cellvardate & ",PayPeriods!A:C,3,0)"
+                formula = "=LOOKUP(2,1/(PayPeriods!B2:B100<=" & cellvar & ")/(PayPeriods!C2:C100>=" & cellvar & "),PayPeriods!A2:A100)"
+                formuladate1 = "=VLOOKUP(" & cellvardate & ",PayPeriods!A2:C100,2,0)"
+                formuladate2 = "=VLOOKUP(" & cellvardate & ",PayPeriods!A2:C100,3,0)"
                 
                 newWS.Cells(rowCounter, 1).formula = formula
                 newWS.Cells(rowCounter, 2).formula = formuladate1
@@ -76,13 +78,23 @@ Sub CollateOTFiles()
                 newWS.Cells(rowCounter, 5).Value = ws.Range("B4").Value
                 newWS.Cells(rowCounter, 6).Value = ws.Range("C4").Value
                 newWS.Cells(rowCounter, 7).Value = ws.Range("D4").Value
-                newWS.Cells(rowCounter, 8).Value = ws.Range("E4").Value
+                
+                If ws.Range("E4").Value <> "" Then
+                    newWS.Cells(rowCounter, 8).Value = ws.Range("E4").Value
+                Else
+                    unitvar = "D" & rowCounter
+                    newWS.Cells(rowCounter, 8).formula = "=VLOOKUP(" & unitvar & ",PayPeriods!F1:J200,5,0)"
+                End If
+                
                 newWS.Cells(rowCounter, 9).Value = sourceRow.Columns("A").Value
                 newWS.Cells(rowCounter, 10).Value = sourceRow.Columns("B").Value
                 newWS.Cells(rowCounter, 11).Value = sourceRow.Columns("C").Value
                 newWS.Cells(rowCounter, 12).Value = sourceRow.Columns("I").Value
                 newWS.Cells(rowCounter, 13).Value = sourceRow.Columns("L").Value
                 newWS.Cells(rowCounter, 14).Value = sourceRow.Columns("M").Value
+                
+                costvar = "N" & rowCounter
+                newWS.Cells(rowCounter, 15).formula = "=VLOOKUP(" & unitvar & ",PayPeriods!$F$1:$K$200,6,0)*" & costvar
                 
                 newWS.Columns("L").NumberFormat = "hh:mm"
                 newWS.Columns("M").NumberFormat = "hh:mm"
@@ -104,6 +116,10 @@ Sub CollateOTFiles()
 
     ' Save and close the new workbook
     newWB.Sheets(1).Activate
+    FolderPath = FolderPath & "Results\"
+    If Dir(FolderPath, vbDirectory) = "" Then
+        MkDir FolderPath
+    End If
     newWB.SaveAs FolderPath & "CollatedOT.xlsx"
     newWB.Close SaveChanges:=False
     
@@ -117,3 +133,4 @@ Sub CollateOTFiles()
     MsgBox "Operation complete. Check the folder for 'CollatedOT.xlsx'."
     
 End Sub
+
