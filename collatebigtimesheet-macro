@@ -1,0 +1,122 @@
+Sub BigTimeSheet()
+    Dim FolderPath As String
+    Dim selectedFile As Variant
+    Dim excelApp As Excel.Application
+    Dim wb As Object
+    Dim ws As Object
+    Dim newWB As Object
+    Dim newWS As Object
+    Dim rowCounter As Long
+    Dim errorCounter As Long
+    
+    Dim sourceRow As Range
+    Dim cell As Range
+    Dim isEmpty As Boolean
+
+
+    ' Prompt the user to select a folder
+    With Application.FileDialog(msoFileDialogFolderPicker)
+        .Title = "Select Folder"
+        .Show
+        If .SelectedItems.Count = 0 Then Exit Sub
+        FolderPath = .SelectedItems(1) & Application.PathSeparator
+    End With
+    
+     ' Create a new workbook to record the file names
+    Set newWB = Workbooks.Add
+    ThisWorkbook.Sheets("BIGTSTemplate").Copy Before:=newWB.Sheets(1)
+    
+    Set newWS = newWB.Sheets("BIGTSTemplate")
+    Set newWSX = newWB.Sheets(2)
+    newWSX.Cells(1, 1) = "Error File List"
+    rowCounter = 1
+    errorCounter = 2
+    
+     ' Get all Excel files in the selected folder
+    selectedFile = Dir(FolderPath & "*.xlsx")
+    
+    
+     ' Complex loops doing the transferring
+    Do While selectedFile <> ""
+        Set excelApp = New Excel.Application
+        Set wb = excelApp.Workbooks.Open(FolderPath & selectedFile)
+        Set ws = wb.Sheets(1)
+    
+        If rowCounter = 1 Then
+            ' Copy the dates into the main file
+            newWS.Cells(2, 5) = ws.Range("C8").Value
+            newWS.Cells(2, 6) = ws.Range("C9").Value
+            newWS.Cells(2, 7) = ws.Range("C10").Value
+            newWS.Cells(2, 8) = ws.Range("C11").Value
+            newWS.Cells(2, 9) = ws.Range("C12").Value
+            newWS.Cells(2, 10) = ws.Range("C13").Value
+            newWS.Cells(2, 11) = ws.Range("C14").Value
+            newWS.Cells(2, 12) = ws.Range("C17").Value
+            newWS.Cells(2, 13) = ws.Range("C18").Value
+            newWS.Cells(2, 14) = ws.Range("C19").Value
+            newWS.Cells(2, 15) = ws.Range("C20").Value
+            newWS.Cells(2, 16) = ws.Range("C21").Value
+            newWS.Cells(2, 17) = ws.Range("C22").Value
+            newWS.Cells(2, 18) = ws.Range("C23").Value
+            
+            rowCounter = 2
+        End If
+        
+        SourceName = ws.Range("D3:E4").Cells(1, 1).Value
+    
+        ' Find the row number where the source name matches the target sheet column A
+        On Error Resume Next
+        targetRow = WorksheetFunction.Match(SourceName, newWS.Range("A1:A160"), 0)
+        On Error GoTo 0
+        
+        ' If the source name is not found in the target sheet
+        If targetRow < 2 Then
+            newWSX.Cells(errorCounter, 1) = wb.Name
+            errorCounter = errorCounter + 1
+        End If
+        
+        If targetRow > 2 Then
+            newWS.Cells(targetRow, 5) = ws.Range("L8").Value + ws.Range("X8").Value
+            newWS.Cells(targetRow, 6) = ws.Range("L9").Value + ws.Range("X9").Value
+            newWS.Cells(targetRow, 7) = ws.Range("L10").Value + ws.Range("X10").Value
+            newWS.Cells(targetRow, 8) = ws.Range("L11").Value + ws.Range("X11").Value
+            newWS.Cells(targetRow, 9) = ws.Range("L12").Value + ws.Range("X12").Value
+            newWS.Cells(targetRow, 10) = ws.Range("L13").Value + ws.Range("X13").Value
+            newWS.Cells(targetRow, 11) = ws.Range("L14").Value + ws.Range("X14").Value
+            newWS.Cells(targetRow, 12) = ws.Range("L17").Value + ws.Range("X17").Value
+            newWS.Cells(targetRow, 13) = ws.Range("L18").Value + ws.Range("X18").Value
+            newWS.Cells(targetRow, 14) = ws.Range("L19").Value + ws.Range("X19").Value
+            newWS.Cells(targetRow, 15) = ws.Range("L20").Value + ws.Range("X20").Value
+            newWS.Cells(targetRow, 16) = ws.Range("L21").Value + ws.Range("X21").Value
+            newWS.Cells(targetRow, 17) = ws.Range("L22").Value + ws.Range("X22").Value
+            newWS.Cells(targetRow, 18) = ws.Range("L23").Value + ws.Range("X23").Value
+        End If
+        
+        newWSX.Cells(2, 2) = targetRow
+        
+        wb.Close SaveChanges:=False
+        excelApp.Quit
+        
+        selectedFile = Dir
+    Loop
+       
+
+    ' Save and close the new workbook
+    newWB.Sheets(1).Activate
+    FolderPath = FolderPath & "Results\"
+    If Dir(FolderPath, vbDirectory) = "" Then
+        MkDir FolderPath
+    End If
+    newWB.SaveAs FolderPath & "CollatedBigTS.xlsx"
+    newWB.Close SaveChanges:=False
+    
+    ' Cleanup
+    Set ws = Nothing
+    Set wb = Nothing
+    Set excelApp = Nothing
+    Set newWS = Nothing
+    Set newWB = Nothing
+    
+    MsgBox "Operation complete. Check the folder for 'CollatedBigTS.xlsx'."
+    
+End Sub
